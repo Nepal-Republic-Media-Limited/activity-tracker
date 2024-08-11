@@ -18,6 +18,6 @@ class ActivityTrackerProvider extends ServiceProvider
     public function boot()
     {
         $this->registerMigrations(__DIR__.'/../database/migrations');
-        $this->app['router']->aliasMiddleware('nrm-activity-tracker', ActivityTracker::class);
+        $this->app['router']->aliasMiddleware('nrm-kyc-tracker', ActivityTracker::class);
     }
 }
