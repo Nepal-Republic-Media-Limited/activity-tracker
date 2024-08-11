@@ -21,7 +21,7 @@ class ActivityTracker
         $cacheKey = 'user_location_' . $ipAddress;
         $userLocation = Cache::get($cacheKey);
         if (!$userLocation) {
-            $userLocation = file_get_contents("https://api.ipgeolocation.io/ipgeo?apiKey=7713384feb3242fab1a1891f2df22a26");
+            $userLocation = file_get_contents("https://api.ipgeolocation.io/ipgeo?apiKey=4f199e8a80214523bd2b10bc6ccde02a");
             Cache::put($cacheKey, $userLocation);
         }
         $location = json_decode($userLocation);
