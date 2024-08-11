@@ -26,6 +26,7 @@ trait PublishMigrationTrait
             };
 
             $this->publishes(iterator_to_array($generator($directory)), 'migrations');
+            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         }
     }
 }

@@ -17,7 +17,7 @@ class ActivityTracker
         $user = $isApiRequest ? Auth::guard('api')->user() : Auth::user();
         $ipAddress = $request->header('X-Forwarded-For', $request->ip());
         $userAgent = $request->header('X-User-Agent', $request->userAgent());
-        $userLocation = file_get_contents('https://ipapi.co/'.$ipAddress.'/json/');
+        $userLocation = file_get_contents("https://api.ipgeolocation.io/ipgeo?apiKey=7713384feb3242fab1a1891f2df22a26&ip=$ipAddress");
         $location = json_decode($userLocation);
         // Collect activity data
         $activityData = [
