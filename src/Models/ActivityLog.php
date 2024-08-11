@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ActivityLog extends Model
 {
+
+    protected $table="kyc_logs";
     protected $fillable = [
         'user_id',
         'ip_address',
