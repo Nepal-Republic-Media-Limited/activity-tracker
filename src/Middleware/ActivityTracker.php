@@ -2,6 +2,7 @@
 
 namespace Nrm\ActivityTracker\Middleware;
 
+use App\Models\News;
 use Closure;
 use Nrm\ActivityTracker\Jobs\LogActivity;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,7 @@ class ActivityTracker
         $user = $isApiRequest ? Auth::guard('api')->user() : Auth::user();
         $ipAddress = $request->header('X-Forwarded-For', $request->ip());
         $userAgent = $request->header('X-User-Agent', $request->userAgent());
+        $newsId = $this->getNewsId($request);
         $cacheKey = 'user_location_' . $ipAddress;
         $userLocation = Cache::get($cacheKey);
         if (!$userLocation) {
@@ -32,6 +34,7 @@ class ActivityTracker
             'user_agent' => $userAgent,
             'country' => isset($location->country_name) ? $location->country_name : null,
             'city' => isset($location->city) ? $location->city : null,
+            'news_id' => $newsId,
             'url' => $request->fullUrl(),
             'method' => $request->method(),
             'created_at' => now(),
@@ -43,5 +46,19 @@ class ActivityTracker
         LogActivity::dispatch($activityData);
 
         return $next($request);
+    }
+
+    function getNewsId($request)
+    {
+        $segments = $request->segments();
+
+        if (count($segments) >= 2 && $segments[count($segments) - 2] === 'news') {
+            $lastSegment = $segments[count($segments) - 1];
+            if ($lastSegment != null) {
+                $newsId = News::where('permalink', $lastSegment)->first()->id;
+                return $newsId;
+            }
+        }
+        return null;
     }
 }
