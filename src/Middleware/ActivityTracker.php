@@ -55,8 +55,10 @@ class ActivityTracker
         if (count($segments) >= 2 && $segments[count($segments) - 2] === 'news') {
             $lastSegment = $segments[count($segments) - 1];
             if ($lastSegment != null) {
-                $newsId = News::where('permalink', $lastSegment)->first()->id;
-                return $newsId;
+                $newsId = News::where('permalink', $lastSegment)->first();
+                if(isset($newsId->id) && $newsId->id !=null){
+                    return $newsId->id;
+                }
             }
         }
         return null;
