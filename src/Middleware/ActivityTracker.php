@@ -21,13 +21,16 @@ class ActivityTracker
         $ipAddress = $request->header('X-Forwarded-For', $request->ip());
         $userAgent = $request->header('X-User-Agent', $request->userAgent());
         $newsId = $this->getNewsId($request);
-        $cacheKey = 'user_locations_' . $ipAddress;
+        $cacheKey = 'user_location_' . $ipAddress;
         $userLocation = Cache::get($cacheKey);
-        if (!$userLocation && $ipAddress !="127.0.0.1") {
+        if (!$userLocation) {
             $userLocation = $this->getIpGeolocation($ipAddress);
-            Cache::put($cacheKey, $userLocation);
+            if($userLocation->getStatusCode() !== 403){
+                $location = json_decode($userLocation);
+                Cache::put($cacheKey, $userLocation);
+            }
         }
-        $location = json_decode($userLocation);
+
         // Collect activity data
         $activityData = [
             'user_id' => $user ? $user->id : null,
@@ -83,7 +86,7 @@ class ActivityTracker
             $data = $response->json();
             return $data;
         } else {
-            return response()->json(['error' => 'Unable to fetch data']);
+            return response()->json(['error' => 'Unable to fetch data'],403);
         }
     }
 }
