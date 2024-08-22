@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Http;
 use Nrm\ActivityTracker\Jobs\LogActivity;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Torann\GeoIP\Facades\GeoIP;
 
 class ActivityTracker
 {
@@ -25,16 +24,16 @@ class ActivityTracker
         $cacheKey = 'user_locations_' . $ipAddress;
         $userLocation = Cache::get($cacheKey);
         if (!$userLocation && $ipAddress !="127.0.0.1") {
-            $userLocation = GeoIP::getLocation($ipAddress);
+            $userLocation = $this->getIpGeolocation($ipAddress);
             Cache::put($cacheKey, $userLocation);
         }
-        $location = $userLocation;
+        $location = json_decode($userLocation);
         // Collect activity data
         $activityData = [
             'user_id' => $user ? $user->id : null,
             'ip_address' => $ipAddress,
             'user_agent' => $userAgent,
-            'country' => isset($location->country) ? $location->country : null,
+            'country' => isset($location->country_name) ? $location->country_name : null,
             'city' => isset($location->city) ? $location->city : null,
             'news_id' => $newsId,
             'url' => $request->fullUrl(),
@@ -83,6 +82,8 @@ class ActivityTracker
             // Decode the JSON response
             $data = $response->json();
             return $data;
+        } else {
+            return response()->json(['error' => 'Unable to fetch data']);
         }
     }
 }
