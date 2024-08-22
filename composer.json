@@ -21,5 +21,7 @@
             "email": "bhuwanoza59@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "torann/geoip": "^3.0"
+    }
 }
