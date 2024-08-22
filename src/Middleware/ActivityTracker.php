@@ -4,6 +4,7 @@ namespace Nrm\ActivityTracker\Middleware;
 
 use App\Models\News;
 use Closure;
+use Illuminate\Support\Facades\Http;
 use Nrm\ActivityTracker\Jobs\LogActivity;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -20,10 +21,10 @@ class ActivityTracker
         $ipAddress = $request->header('X-Forwarded-For', $request->ip());
         $userAgent = $request->header('X-User-Agent', $request->userAgent());
         $newsId = $this->getNewsId($request);
-        $cacheKey = 'user_location_' . $ipAddress;
+        $cacheKey = 'user_locations_' . $ipAddress;
         $userLocation = Cache::get($cacheKey);
-        if (!$userLocation) {
-            $userLocation = file_get_contents("https://api.ipgeolocation.io/ipgeo?apiKey=b4c08caf46b0479f838286d517af5d09&ip=$ipAddress");
+        if (!$userLocation && $ipAddress !="127.0.0.1") {
+            $userLocation = $this->getIpGeolocation($ipAddress);
             Cache::put($cacheKey, $userLocation);
         }
         $location = json_decode($userLocation);
@@ -62,5 +63,28 @@ class ActivityTracker
             }
         }
         return null;
+    }
+
+    public function getIpGeolocation($ip)
+    {
+        // API key and endpoint
+        $apiKey = 'b4c08caf46b0479f838286d517af5d09';
+        $url = "https://api.ipgeolocation.io/ipgeo";
+
+        // Send the GET request
+        $response = Http::get($url, [
+            'apiKey' => $apiKey,
+            'ip' => $ip,
+        ]);
+
+        // Check for a successful response
+        if ($response->successful()) {
+            // Decode the JSON response
+            $data = $response->json();
+            return $data;
+        } else {
+            // Handle the error
+            return ['error' => 'Unable to fetch data'];
+        }
     }
 }
