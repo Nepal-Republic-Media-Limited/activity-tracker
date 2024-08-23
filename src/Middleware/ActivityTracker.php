@@ -21,14 +21,9 @@ class ActivityTracker
         $ipAddress = $request->header('X-Forwarded-For', $request->ip());
         $userAgent = $request->header('X-User-Agent', $request->userAgent());
         $newsId = $this->getNewsId($request);
-        $cacheKey = 'user_location_' . $ipAddress;
-        $userLocation = Cache::get($cacheKey);
-        if (!$userLocation) {
-            $userLocation = $this->getIpGeolocation($ipAddress);
-            if($userLocation->getStatusCode() !== 403){
-                $location = json_decode($userLocation);
-                Cache::put($cacheKey, $userLocation);
-            }
+        $userLocation = $this->getIpGeolocation($ipAddress);
+        if($userLocation->getStatusCode() !== 403){
+            $location = json_decode($userLocation);
         }
 
         // Collect activity data
