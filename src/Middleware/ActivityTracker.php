@@ -21,10 +21,8 @@ class ActivityTracker
         $ipAddress = $request->header('X-Forwarded-For', $request->ip());
         $userAgent = $request->header('X-User-Agent', $request->userAgent());
         $newsId = $this->getNewsId($request);
-        $userLocation = $this->getIpGeolocation($ipAddress);
-        if($userLocation->getStatusCode() !== 403){
-            $location = json_decode($userLocation);
-        }
+        $location = $this->getIpGeolocation($ipAddress);
+
 
         // Collect activity data
         $activityData = [
@@ -55,7 +53,7 @@ class ActivityTracker
             $lastSegment = $segments[count($segments) - 1];
             if ($lastSegment != null) {
                 $newsId = News::where('permalink', $lastSegment)->first();
-                if(isset($newsId->id) && $newsId->id !=null){
+                if (isset($newsId->id) && $newsId->id != null) {
                     return $newsId->id;
                 }
             }
@@ -75,13 +73,14 @@ class ActivityTracker
             'ip' => $ip,
         ]);
 
-        // Check for a successful response
         if ($response->successful()) {
+
             // Decode the JSON response
             $data = $response->json();
             return $data;
         } else {
-            return response()->json(['error' => 'Unable to fetch data'],403);
+            return response()->json(['error' => 'Unable to fetch data'], 403);
         }
     }
+
 }
